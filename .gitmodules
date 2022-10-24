@@ -1,3 +1,6 @@
-[submodule "u8g2"]
-	path = u8g2
-	url = https://github.com/olikraus/u8g2.git
+[submodule "lvgl"]
+	path = lvgl
+	url = https://github.com/lvgl/lvgl.git
+[submodule "lvgl_esp32_drivers"]
+	path = lvgl_esp32_drivers
+	url = https://github.com/lvgl/lvgl_esp32_drivers.git
