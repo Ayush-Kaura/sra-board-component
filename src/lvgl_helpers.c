@@ -50,8 +50,8 @@ void ssd1306_init(void)
     uint8_t orientation_1 = 0;
     uint8_t orientation_2 = 0;
 
-    orientation_1 = 0xA0;
-    orientation_2 = OLED_CMD_SET_COM_SCAN_MODE_NORMAL;
+    orientation_1 = OLED_CMD_SET_SEGMENT_REMAP;// 0xA0;
+    orientation_2 = OLED_CMD_SET_COM_SCAN_MODE_REMAP; //OLED_CMD_SET_COM_SCAN_MODE_NORMAL;
 
     uint8_t display_mode = 0;
 
