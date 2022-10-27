@@ -324,7 +324,7 @@ esp_err_t display_mario_logo()
   return ESP_OK;
 }
 
-esp_err_t display_lsa()
+esp_err_t display_lsa(line_sensor_array readings)
 {
   lv_obj_t *scr = lv_disp_get_scr_act(NULL);
 
@@ -341,10 +341,10 @@ esp_err_t display_lsa()
   for (int i = 0; i < 4; ++i)
   {
     lsa_readings[i] = lv_bar_create(scr);
-    lv_obj_set_size(lsa_readings[i], 10, 48);
+    lv_obj_set_size(lsa_readings[i], 10, 30);
     lv_obj_set_pos(lsa_readings[i], (27 + i * 20), 0);
     lv_obj_add_style(lsa_readings[i], &style, LV_PART_MAIN);
-    lv_bar_set_value(lsa_readings[i], 50, LV_ANIM_OFF);
+    lv_bar_set_value(lsa_readings[i], readings.adc_reading[3] * 0.03, LV_ANIM_OFF);
   }
 
   return ESP_OK;

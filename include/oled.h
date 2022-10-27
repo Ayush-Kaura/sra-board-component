@@ -83,7 +83,7 @@ esp_err_t display_mario_logo();
 
  * @return esp_err_t i.e it shows if LSA bar is displayed successfully or not
  **/
-esp_err_t display_lsa(); /*To-DO LSA line_sensor_array readings*/
+esp_err_t display_lsa(line_sensor_array readings); /*To-DO LSA line_sensor_array readings*/
 
 /**
  * @brief displays pitch and roll readings on OLED screen
