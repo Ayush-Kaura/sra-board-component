@@ -27,9 +27,6 @@
 
 static const char *TAG = "oled_example";
 
-#define LV_TICK_PERIOD_MS 1
-// static void lv_tick_task(void *arg);
-
 void app_main()
 {
 
@@ -62,39 +59,6 @@ void app_main()
 
     lv_disp_t * disp = lv_disp_drv_register(&disp_drv);
 
-	// lv_theme_t * th = lv_theme_default_init(disp,  lv_color_black(), lv_color_white(), false, &lv_font_montserrat_14); 
-
-	// lv_disp_set_theme(disp, th); 
-
-	/* Create and start a periodic timer interrupt to call lv_tick_inc */
-    // const esp_timer_create_args_t periodic_timer_args = {
-    //     .callback = &lv_tick_task,
-    //     .name = "periodic_gui"
-    // };
-    // esp_timer_handle_t periodic_timer;
-    // ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-    // ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
-    // lv_obj_t *scr = lv_disp_get_scr_act(NULL);
-    // display_sra_logo(scr);
-    // lv_obj_clean(scr);
-    // lv_task_handler();
-    // display_walle_logo(scr);
-    // lv_task_handler();
-    display_servo_values(10, 10, 10, 10);
-    lv_task_handler();
-
-	while (1) {
-        /* Delay 1 tick (assumes FreeRTOS tick is 10ms */
-        
-        vTaskDelay(pdMS_TO_TICKS(100));
-        // lv_task_handler();
-	}
-	free(buf1);
 	ESP_LOGI(TAG, "Successfully displayed Hello World on the OLED Screen");
 }
 
-// static void lv_tick_task(void *arg) {
-//     (void) arg;
-
-//     lv_tick_inc(LV_TICK_PERIOD_MS);
-// }

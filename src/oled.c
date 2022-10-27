@@ -236,7 +236,9 @@ const lv_img_dsc_t mario = {
   .data = mario_map,
 };
 
-static lv_color_t *buf1;
+lv_color_t *buf_1[DISP_BUF_SIZE];
+lv_disp_draw_buf_t disp_buf;
+lv_disp_drv_t disp_drv;
 
 esp_err_t init_oled()
 {
@@ -247,16 +249,11 @@ esp_err_t init_oled()
   lvgl_i2c_driver_init(I2C_NUM_0, OLED_SDA, OLED_SCL, OLED_IIC_FREQ_HZ);
   ssd1306_init();
 
-  lv_disp_draw_buf_t disp_buf;
-
-  buf1 = heap_caps_malloc(DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
-
-  uint32_t size_in_px = DISP_BUF_SIZE; // size_in_px *= 8;
+  uint32_t size_in_px = DISP_BUF_SIZE * 8; 
 
   /* Initialize the working buffer depending on the selected display */
-  lv_disp_draw_buf_init(&disp_buf, buf1, NULL, size_in_px);
+  lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, size_in_px);
 
-  lv_disp_drv_t disp_drv;
   lv_disp_drv_init(&disp_drv);
   disp_drv.hor_res = 128;
   disp_drv.ver_res = 64;
@@ -270,7 +267,6 @@ esp_err_t init_oled()
   display_sra_logo();
 
   ESP_LOGI(TAG_OLED, "Configured OLED Display");
-  // free(buf1);
   return ESP_OK;
 }
 
@@ -301,7 +297,7 @@ esp_err_t display_walle_logo()
   lv_obj_set_size(text, lv_obj_get_self_width(text), 16);
   lv_obj_set_pos(text, 16, 48);
   ESP_LOGI(TAG_OLED, "Displayed Wall-E logo on OLED Screen");
-
+  lv_task_handler();
   return ESP_OK;
 }
 
