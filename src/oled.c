@@ -236,6 +236,10 @@ const lv_img_dsc_t mario = {
   .data = mario_map,
 };
 
+LV_IMG_DECLARE(sra_logo);
+LV_IMG_DECLARE(walle);
+LV_IMG_DECLARE(mario);
+
 lv_color_t *buf_1[DISP_BUF_SIZE];
 lv_disp_draw_buf_t disp_buf;
 lv_disp_drv_t disp_drv;
@@ -245,13 +249,13 @@ esp_err_t init_oled()
 
   lv_init();
 
-  /* Initialize I2C bus used by the drivers */
+  // Initialize I2C bus used by the drivers
   lvgl_i2c_driver_init(OLED_SDA, OLED_SCL, OLED_IIC_FREQ_HZ);
   ssd1306_init();
 
   uint32_t size_in_px = DISP_BUF_SIZE * 8; 
 
-  /* Initialize the working buffer depending on the selected display */
+  // Initialize the working buffer depending on the selected display
   lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, size_in_px);
 
   lv_disp_drv_init(&disp_drv);
@@ -262,9 +266,17 @@ esp_err_t init_oled()
   disp_drv.set_px_cb = ssd1306_set_px_cb;
   disp_drv.draw_buf = &disp_buf;
 
-  lv_disp_t *disp = lv_disp_drv_register(&disp_drv);
+  lv_disp_drv_register(&disp_drv);
 
+  // Display Wall-E logo
   display_sra_logo();
+  vTaskDelay(100);
+  
+  // Display Wall-E logo
+  display_walle_logo();
+
+  // Clear the screen
+  lv_obj_clean(lv_scr_act()); 
 
   ESP_LOGI(TAG_OLED, "Configured OLED Display");
   return ESP_OK;
@@ -272,57 +284,71 @@ esp_err_t init_oled()
 
 esp_err_t display_sra_logo()
 {
-  LV_IMG_DECLARE(sra_logo);
-  lv_obj_t *scr = lv_disp_get_scr_act(NULL);
-  lv_obj_t *logo = lv_img_create(scr);
+  // Clear the screen
+  lv_obj_clean(lv_scr_act()); 
+
+  // Draw SRA logo on the screen
+  lv_obj_t *logo = lv_img_create(lv_scr_act());
   lv_img_set_src(logo, &sra_logo);
   lv_obj_set_size(logo, 115, 64);
   lv_obj_align(logo, LV_ALIGN_CENTER, 0, 0);
   ESP_LOGI(TAG_OLED, "Displayed SRA logo on OLED Screen");
-  lv_task_handler();
+
+  // Refresh Display
+  lv_refr_now(NULL);
+
   return ESP_OK;
 }
 
 esp_err_t display_walle_logo()
 { 
-  LV_IMG_DECLARE(walle);
-  lv_obj_t *scr = lv_disp_get_scr_act(NULL);
-  lv_obj_t *walle_logo = lv_img_create(scr);
+  // Clear the screen
+  lv_obj_clean(lv_scr_act());
+
+  // Draw Wall-E logo on the screen
+  lv_obj_t *walle_logo = lv_img_create(lv_scr_act());
   lv_img_set_src(walle_logo, &walle);
   lv_obj_set_size(walle_logo, 108, 48);
   lv_obj_align(walle_logo, LV_ALIGN_OUT_TOP_MID, 0, 0);
 
-  lv_obj_t *text = lv_label_create(scr);
+  // print "Wall-e" text on the screen
+  lv_obj_t *text = lv_label_create(lv_scr_act());
   lv_label_set_text(text, "Wall-E 2023");
   lv_obj_set_size(text, lv_obj_get_self_width(text), 16);
   lv_obj_set_pos(text, 16, 48);
   ESP_LOGI(TAG_OLED, "Displayed Wall-E logo on OLED Screen");
-  lv_task_handler();
+
+  // Refresh Display
+  lv_refr_now(NULL);
+
   return ESP_OK;
 }
 
 esp_err_t display_mario_logo()
 {
-  lv_obj_t *scr = lv_disp_get_scr_act(NULL);
+  // Clear the screen
+  lv_obj_clean(lv_scr_act());
 
-  LV_IMG_DECLARE(mario);
-  lv_obj_t *mario_logo = lv_img_create(scr);
+  // Draw Mario logo on the screen
+  lv_obj_t *mario_logo = lv_img_create(lv_scr_act());
   lv_img_set_src(mario_logo, &mario);
   lv_obj_set_size(mario_logo, 108, 48);
   lv_obj_align(mario_logo, LV_ALIGN_OUT_TOP_MID, 0, 0);
 
-  lv_obj_t *text = lv_label_create(scr);
+  // print "Mario" text on the screen
+  lv_obj_t *text = lv_label_create(lv_scr_act());
   lv_label_set_text(text, "Mario 2023");
   lv_obj_set_size(text, lv_obj_get_self_width(text), 16);
   lv_obj_set_pos(text, 16, 48);
   ESP_LOGI(TAG_OLED, "Displayed MARIO logo on OLED Screen");
 
+  // Refresh Display
+  lv_refr_now(NULL);
   return ESP_OK;
 }
 
 esp_err_t display_lsa(line_sensor_array readings)
 {
-  lv_obj_t *scr = lv_disp_get_scr_act(NULL);
 
   static lv_style_t style;
   lv_style_init(&style);
@@ -334,9 +360,10 @@ esp_err_t display_lsa(line_sensor_array readings)
 
   lv_obj_t *lsa_readings[4];
 
+  // plot the bar of LSA 0-3
   for (int i = 0; i < 4; ++i)
   {
-    lsa_readings[i] = lv_bar_create(scr);
+    lsa_readings[i] = lv_bar_create(lv_scr_act());
     lv_obj_set_size(lsa_readings[i], 10, 30);
     lv_obj_set_pos(lsa_readings[i], (27 + i * 20), 0);
     lv_obj_add_style(lsa_readings[i], &style, LV_PART_MAIN);
@@ -348,17 +375,16 @@ esp_err_t display_lsa(line_sensor_array readings)
 
 esp_err_t display_mpu(float pitch, float roll)
 {
-  lv_obj_t *scr = lv_disp_get_scr_act(NULL);
 
   // Printing pitch on oled
-  lv_obj_t *pitch_reading = lv_label_create(scr);
+  lv_obj_t *pitch_reading = lv_label_create(lv_scr_act());
   char pitch_str[20];
   sprintf(pitch_str, "Pitch : %0.2f", pitch);
   lv_label_set_text(pitch_reading, pitch_str);
   lv_obj_set_pos(pitch_reading, 2, 15);
 
   // Printing roll on oled
-  lv_obj_t *roll_reading = lv_label_create(scr);
+  lv_obj_t *roll_reading = lv_label_create(lv_scr_act());
   char roll_str[20];
   sprintf(roll_str, "Roll : %0.2f", roll);
   lv_label_set_text(roll_reading, roll_str);
