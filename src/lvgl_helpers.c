@@ -35,6 +35,7 @@ static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t b
  *  STATIC VARIABLES
  **********************/
 static int i2c_port = I2C_NUM_1;
+static const unsigned int I2C_TIMEOUT_MS = 10; //1000
 
 /**********************
  *      MACROS
@@ -208,7 +209,7 @@ static uint8_t send_data(lv_disp_drv_t *disp_drv, void *bytes, size_t bytes_len)
     i2c_master_stop(cmd);
 
     /* Send queued commands */
-    err = i2c_master_cmd_begin(i2c_port, cmd, 10 / portTICK_PERIOD_MS);
+    err = i2c_master_cmd_begin(i2c_port, cmd, I2C_TIMEOUT_MS / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
 
     return ESP_OK == err ? 0 : 1;
@@ -228,7 +229,7 @@ static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t b
     i2c_master_stop(cmd);
 
     /* Send queued commands */
-    err = i2c_master_cmd_begin(i2c_port, cmd, 10 / portTICK_PERIOD_MS);
+    err = i2c_master_cmd_begin(i2c_port, cmd, I2C_TIMEOUT_MS / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
 
     return ESP_OK == err ? 0 : 1;
