@@ -85,8 +85,7 @@ extern "C" {
 // Charge Pump (pg.62)
 #define OLED_CMD_SET_CHARGE_PUMP            0x8D    // follow with 0x14
 
-#define OLED_IIC_FREQ_HZ                    50000  // I2C colock frequency
-#define DISP_I2C_PORT I2C_NUM_0
+#define OLED_IIC_FREQ_HZ                    400000  // I2C clock frequency
 
 /* DISP_BUF_SIZE value doesn't have an special meaning, but it's the size
  * of the buffer(s) passed to LVGL as display buffers. The default values used
@@ -119,7 +118,7 @@ extern "C" {
  **********************/
 
 /* Initialize I2C master  */
-bool lvgl_i2c_driver_init(int port, int sda_pin, int scl_pin, int speed);
+bool lvgl_i2c_driver_init(int sda_pin, int scl_pin, int speed);
 /* Initialize ssd1306 device  */
 void ssd1306_init(void);
 

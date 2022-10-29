@@ -34,6 +34,7 @@ static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t b
 /**********************
  *  STATIC VARIABLES
  **********************/
+static int i2c_port = I2C_NUM_1;
 
 /**********************
  *      MACROS
@@ -45,6 +46,8 @@ static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t b
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
+bool i2c_initialised = false;
+
 void ssd1306_init(void)
 {
     uint8_t orientation_1 = 0;
@@ -151,11 +154,12 @@ void ssd1306_sleep_out(void)
  * So we should be able to know if the display and touch controllers shares the
  * same i2c master.
  */
-bool lvgl_i2c_driver_init(int port, int sda_pin, int scl_pin, int speed_hz)
+bool lvgl_i2c_driver_init(int sda_pin, int scl_pin, int speed_hz)
 {
     esp_err_t err;
-    
-    ESP_LOGI(TAG, "Initializing I2C master port %d...", port);
+
+    i2c_port = i2c_initialised ? I2C_NUM_1 : I2C_NUM_0;
+    ESP_LOGI(TAG, "Initializing I2C master port %d...", i2c_port);
     ESP_LOGI(TAG, "SDA pin: %d, SCL pin: %d, Speed: %d (Hz)",
         sda_pin, scl_pin, speed_hz);
     
@@ -169,11 +173,11 @@ bool lvgl_i2c_driver_init(int port, int sda_pin, int scl_pin, int speed_hz)
     };
 
     ESP_LOGI(TAG, "Setting I2C master configuration...");
-    err = i2c_param_config(port, &conf);
+    err = i2c_param_config(i2c_port, &conf);
     assert(ESP_OK == err);
 
     ESP_LOGI(TAG, "Installing I2C master driver...");
-    err = i2c_driver_install(port,
+    err = i2c_driver_install(i2c_port,
         I2C_MODE_MASTER,
         0, 0 /*I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE */,
         0 /* intr_alloc_flags */);
@@ -204,7 +208,7 @@ static uint8_t send_data(lv_disp_drv_t *disp_drv, void *bytes, size_t bytes_len)
     i2c_master_stop(cmd);
 
     /* Send queued commands */
-    err = i2c_master_cmd_begin(DISP_I2C_PORT, cmd, 10 / portTICK_PERIOD_MS);
+    err = i2c_master_cmd_begin(i2c_port, cmd, 10 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
 
     return ESP_OK == err ? 0 : 1;
@@ -224,7 +228,7 @@ static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t b
     i2c_master_stop(cmd);
 
     /* Send queued commands */
-    err = i2c_master_cmd_begin(DISP_I2C_PORT, cmd, 10 / portTICK_PERIOD_MS);
+    err = i2c_master_cmd_begin(i2c_port, cmd, 10 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
 
     return ESP_OK == err ? 0 : 1;

@@ -246,7 +246,7 @@ esp_err_t init_oled()
   lv_init();
 
   /* Initialize I2C bus used by the drivers */
-  lvgl_i2c_driver_init(I2C_NUM_0, OLED_SDA, OLED_SCL, OLED_IIC_FREQ_HZ);
+  lvgl_i2c_driver_init(OLED_SDA, OLED_SCL, OLED_IIC_FREQ_HZ);
   ssd1306_init();
 
   uint32_t size_in_px = DISP_BUF_SIZE * 8; 
