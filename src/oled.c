@@ -268,7 +268,7 @@ esp_err_t init_oled()
 
   lv_disp_drv_register(&disp_drv);
 
-  // Display Wall-E logo
+  // Display SRA logo
   display_sra_logo();
   vTaskDelay(100);
   
@@ -344,11 +344,14 @@ esp_err_t display_mario_logo()
 
   // Refresh Display
   lv_refr_now(NULL);
+  
   return ESP_OK;
 }
 
 esp_err_t display_lsa(line_sensor_array readings)
 {
+  // Clear the screen
+  lv_obj_clean(lv_scr_act());
 
   static lv_style_t style;
   lv_style_init(&style);
@@ -370,11 +373,16 @@ esp_err_t display_lsa(line_sensor_array readings)
     lv_bar_set_value(lsa_readings[i], readings.adc_reading[3] * 0.03, LV_ANIM_OFF);
   }
 
+  // Refresh Display
+  lv_refr_now(NULL);
+
   return ESP_OK;
 }
 
 esp_err_t display_mpu(float pitch, float roll)
 {
+  // Clear the screen
+  lv_obj_clean(lv_scr_act());
 
   // Printing pitch on oled
   lv_obj_t *pitch_reading = lv_label_create(lv_scr_act());
@@ -390,11 +398,17 @@ esp_err_t display_mpu(float pitch, float roll)
   lv_label_set_text(roll_reading, roll_str);
   lv_obj_set_pos(roll_reading, 2, 30);
 
+  // Refresh Display
+  lv_refr_now(NULL);
+
   return ESP_OK;
 }
 
 esp_err_t display_pid_values(float kp, float ki, float kd)
 {
+  // Clear the screen
+  lv_obj_clean(lv_scr_act());
+
   char kp_str[10], ki_str[10], kd_str[10];
 
   lv_obj_t *scr = lv_disp_get_scr_act(NULL);
@@ -423,11 +437,17 @@ esp_err_t display_pid_values(float kp, float ki, float kd)
     lv_obj_set_pos(text[i], 30 * i, 16 * (i + 1));
   }
 
+  // Refresh Display
+  lv_refr_now(NULL);
+
   return ESP_OK;
 }
 
 esp_err_t display_servo_values(int s1, int s2, int s3, int s4)
 {
+    
+  // Clear the screen
+  lv_obj_clean(lv_scr_act());
 
   char sA_str[20], sB_str[20], sC_str[20], sD_str[20];
   lv_obj_t *scr = lv_disp_get_scr_act(NULL);
@@ -459,5 +479,8 @@ esp_err_t display_servo_values(int s1, int s2, int s3, int s4)
     lv_obj_set_pos(text[i], 0, 16 * i);
   }
 
+  // Refresh Display
+  lv_refr_now(NULL);
+  
   return ESP_OK;
 }
