@@ -34,7 +34,7 @@ extern "C" {
 #include "driver/i2c.h"
 #include "assert.h"
 #include "lvgl.h"
-
+#include "pin_defs.h"
 
 /*********************
  *      DEFINES
