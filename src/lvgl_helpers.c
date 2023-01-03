@@ -34,8 +34,9 @@ static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t b
 /**********************
  *  STATIC VARIABLES
  **********************/
-static int i2c_port = I2C_NUM_1;
-static const unsigned int I2C_TIMEOUT_MS = 10; //1000
+static int i2c_port = I2C_NUM_0;
+//static const unsigned int I2C_TIMEOUT_MS = 10; //1000
+static i2c_dev_t ssd1306_dev_t;
 
 /**********************
  *      MACROS
@@ -158,33 +159,47 @@ void ssd1306_sleep_out(void)
 bool lvgl_i2c_driver_init(int sda_pin, int scl_pin, int speed_hz)
 {
     esp_err_t err;
+    // i2c_initialised = false;
 
-    i2c_port = i2c_initialised ? I2C_NUM_1 : I2C_NUM_0;
-    ESP_LOGI(TAG, "Initializing I2C master port %d...", i2c_port);
-    ESP_LOGI(TAG, "SDA pin: %d, SCL pin: %d, Speed: %d (Hz)",
-        sda_pin, scl_pin, speed_hz);
+    // i2c_port = i2c_initialised ? I2C_NUM_1 : I2C_NUM_0;
+
+    CHECK(i2cdev_init());
+
+    ssd1306_dev_t.port = i2c_port;
+    ssd1306_dev_t.addr = OLED_I2C_ADDRESS;
+    ssd1306_dev_t.cfg.mode = I2C_MODE_MASTER;
+    ssd1306_dev_t.cfg.sda_io_num = sda_pin;
+    ssd1306_dev_t.cfg.scl_io_num = scl_pin;
+    ssd1306_dev_t.cfg.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    ssd1306_dev_t.cfg.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    ssd1306_dev_t.cfg.master.clk_speed = OLED_IIC_FREQ_HZ;
+
+    return i2c_dev_create_mutex(&ssd1306_dev_t);
+    // ESP_LOGI(TAG, "Initializing I2C master port %d...", i2c_port);
+    // ESP_LOGI(TAG, "SDA pin: %d, SCL pin: %d, Speed: %d (Hz)",
+    //     sda_pin, scl_pin, speed_hz);
     
-    i2c_config_t conf = {
-        .mode               = I2C_MODE_MASTER,
-        .sda_io_num         = sda_pin,
-        .sda_pullup_en      = GPIO_PULLUP_ENABLE,
-        .scl_io_num         = scl_pin,
-        .scl_pullup_en      = GPIO_PULLUP_ENABLE,
-        .master.clk_speed   = speed_hz,
-    };
+    // i2c_config_t conf = {
+    //     .mode               = I2C_MODE_MASTER,
+    //     .sda_io_num         = sda_pin,
+    //     .sda_pullup_en      = GPIO_PULLUP_ENABLE,
+    //     .scl_io_num         = scl_pin,
+    //     .scl_pullup_en      = GPIO_PULLUP_ENABLE,
+    //     .master.clk_speed   = speed_hz,
+    // };
 
-    ESP_LOGI(TAG, "Setting I2C master configuration...");
-    err = i2c_param_config(i2c_port, &conf);
-    assert(ESP_OK == err);
+    // ESP_LOGI(TAG, "Setting I2C master configuration...");
+    // err = i2c_param_config(i2c_port, &conf);
+    // assert(ESP_OK == err);
 
-    ESP_LOGI(TAG, "Installing I2C master driver...");
-    err = i2c_driver_install(i2c_port,
-        I2C_MODE_MASTER,
-        0, 0 /*I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE */,
-        0 /* intr_alloc_flags */);
-    assert(ESP_OK == err);
+    // ESP_LOGI(TAG, "Installing I2C master driver...");
+    // err = i2c_driver_install(i2c_port,
+    //     I2C_MODE_MASTER,
+    //     0, 0 /*I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE */,
+    //     0 /* intr_alloc_flags */);
+    // assert(ESP_OK == err);
 
-    return ESP_OK != err;
+    return ESP_OK; // != err;
 }
 
 /**********************
@@ -197,22 +212,26 @@ static uint8_t send_data(lv_disp_drv_t *disp_drv, void *bytes, size_t bytes_len)
 
     uint8_t *data = (uint8_t *) bytes;
 
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    I2C_DEV_TAKE_MUTEX(&ssd1306_dev_t);
+    I2C_DEV_CHECK(&ssd1306_dev_t, i2c_dev_write(&ssd1306_dev_t, NULL, 0, data, bytes_len));
+    I2C_DEV_GIVE_MUTEX(&ssd1306_dev_t);
 
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (OLED_I2C_ADDRESS << 1) | I2C_MASTER_WRITE, true);
+    // i2c_cmd_handle_t cmd = i2c_cmd_link_create();
 
-    for (size_t idx = 0; idx < bytes_len; idx++) {
-        i2c_master_write_byte(cmd, data[idx], true);
-    }
+    // i2c_master_start(cmd);
+    // i2c_master_write_byte(cmd, (OLED_I2C_ADDRESS << 1) | I2C_MASTER_WRITE, true);
 
-    i2c_master_stop(cmd);
+    // for (size_t idx = 0; idx < bytes_len; idx++) {
+    //     i2c_master_write_byte(cmd, data[idx], true);
+    // }
 
-    /* Send queued commands */
-    err = i2c_master_cmd_begin(i2c_port, cmd, I2C_TIMEOUT_MS / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
+    // i2c_master_stop(cmd);
 
-    return ESP_OK == err ? 0 : 1;
+    // /* Send queued commands */
+    // err = i2c_master_cmd_begin(i2c_port, cmd, I2C_TIMEOUT_MS / portTICK_PERIOD_MS);
+    // i2c_cmd_link_delete(cmd);
+
+    return ESP_OK; // == err ? 0 : 1;
 }
 
 static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t buffer_len)
@@ -220,17 +239,25 @@ static uint8_t send_pixels(lv_disp_drv_t *disp_drv, void *color_buffer, size_t b
     (void) disp_drv;
     esp_err_t err;
 
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (OLED_I2C_ADDRESS << 1) | I2C_MASTER_WRITE, true);
+    //CHECK(lvgl_i2c_driver_init(OLED_SDA, OLED_SCL, OLED_IIC_FREQ_HZ));
+    I2C_DEV_TAKE_MUTEX(&ssd1306_dev_t);
+    uint8_t data = 0x40;
+    I2C_DEV_CHECK(&ssd1306_dev_t, i2c_dev_write(&ssd1306_dev_t, NULL, 0, &data, 1));
+    uint8_t *color_buffers = (uint8_t *)color_buffer;
+    I2C_DEV_CHECK(&ssd1306_dev_t, i2c_dev_write_oled(&ssd1306_dev_t, NULL, 0, color_buffers, buffer_len));
+    I2C_DEV_GIVE_MUTEX(&ssd1306_dev_t);
 
-    i2c_master_write_byte(cmd, OLED_CONTROL_BYTE_DATA_STREAM, true);
-    i2c_master_write(cmd, (uint8_t *) color_buffer, buffer_len, true);
-    i2c_master_stop(cmd);
+    // i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    // i2c_master_start(cmd);
+    // i2c_master_write_byte(cmd, (OLED_I2C_ADDRESS << 1) | I2C_MASTER_WRITE, true);
 
-    /* Send queued commands */
-    err = i2c_master_cmd_begin(i2c_port, cmd, I2C_TIMEOUT_MS / portTICK_PERIOD_MS);
-    i2c_cmd_link_delete(cmd);
+    // i2c_master_write_byte(cmd, OLED_CONTROL_BYTE_DATA_STREAM, true);
+    // i2c_master_write(cmd, (uint8_t *) color_buffer, buffer_len, true);
+    // i2c_master_stop(cmd);
 
-    return ESP_OK == err ? 0 : 1;
+    // /* Send queued commands */
+    // err = i2c_master_cmd_begin(i2c_port, cmd, 10 / portTICK_PERIOD_MS);
+    // i2c_cmd_link_delete(cmd);
+
+    return ESP_OK ; //== err ? 0 : 1;
 }
