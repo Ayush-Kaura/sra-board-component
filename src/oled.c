@@ -355,22 +355,26 @@ esp_err_t display_lsa(line_sensor_array readings)
 
   static lv_style_t style;
   lv_style_init(&style);
-  lv_style_set_bg_opa(&style, LV_OPA_TRANSP);
+  lv_style_set_bg_opa(&style, LV_OPA_COVER);
   lv_style_set_bg_color(&style, lv_color_black());
-  lv_style_set_outline_opa(&style, LV_OPA_COVER);
-  lv_style_set_outline_width(&style, 2);
-  lv_style_set_outline_color(&style, lv_color_black());
 
-  lv_obj_t *lsa_readings[4];
+  static lv_style_t style_outline;
+  lv_style_init(&style_outline);
+  lv_style_set_outline_opa(&style_outline, LV_OPA_COVER);
+  lv_style_set_outline_width(&style_outline, 2);
+  lv_style_set_outline_color(&style_outline, lv_color_black());
 
-  // plot the bar of LSA 0-3
-  for (int i = 0; i < 4; ++i)
+  lv_obj_t *lsa_readings[5];
+
+  // plot the bar of LSA 0-4
+  for (int i = 0; i < 5; ++i)
   {
     lsa_readings[i] = lv_bar_create(lv_scr_act());
-    lv_obj_set_size(lsa_readings[i], 10, 30);
-    lv_obj_set_pos(lsa_readings[i], (27 + i * 20), 0);
-    lv_obj_add_style(lsa_readings[i], &style, LV_PART_MAIN);
-    lv_bar_set_value(lsa_readings[i], readings.adc_reading[3] * 0.03, LV_ANIM_OFF);
+    lv_obj_set_size(lsa_readings[i], 10, 40);
+    lv_obj_set_pos(lsa_readings[i], (18 + i * 20), 0);
+    lv_bar_set_value(lsa_readings[i], readings.adc_reading[3] * 0.04, LV_ANIM_OFF);
+    lv_obj_add_style(lsa_readings[i], &style_outline, LV_PART_MAIN);
+    lv_obj_add_style(lsa_readings[i], &style, LV_PART_INDICATOR);
   }
 
   // Refresh Display
